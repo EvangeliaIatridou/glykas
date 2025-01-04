@@ -109,7 +109,7 @@ class MLP{
 				double[] interDerivatives;
 				interDerivatives = updateInterDerivative(interDerivative);
 
-				System.out.println("iiiiiiiiii "+interDerivative);
+				//System.out.println("iiiiiiiiii "+interDerivative); //debug
 				//update weights
 				int counter = 0;
 				for (Layer layer : layers) { 
