@@ -30,6 +30,17 @@ class MLP{
 		System.out.println("\n----------------------------\n");
     }
 
+	public double[] updateInterDerivative(double interDerivative){
+		double[] interDerivatives = new double[layers.length];
+		int counter=0;
+		for(Layer layer: layers){
+			interDerivatives[counter] = layer.updateInterDerivative(interDerivative);
+			//System.out.println("ssssss "+interDerivatives[counter]);
+			counter++;
+		}
+		return interDerivatives;
+		
+	}
 
 	public void forwardpass(double[] initialInput) {
 		layers[0].setNeuronInputs(initialInput);
@@ -60,7 +71,8 @@ class MLP{
 			double[] currentDeltas = currentLayer.computeDeltas(nextLayer.getWeights(), outputDeltas);
 			outputDeltas = currentDeltas;
 		}
-/*
+
+		/*
 		for (Layer layer : layers) {  //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 			layer.updateWeights(learningRate);
 		}*/
@@ -71,7 +83,7 @@ class MLP{
 		for (int i = 0; i < targets.length; i++) {
             double error = 0;
             for (int j = 0; j < outputSize; j++) {
-                error += Math.pow(targets[i][j] - finalOutput[j], 2); 
+                error += Math.pow(targets[i][j] - finalOutput[j], 2);
             }
             totalError += error;
         }
@@ -84,6 +96,7 @@ class MLP{
 		int epoch = 0;
 		double errorDifference = Double.MAX_VALUE;
 		double previousError = 0;
+		//double interDerivative; //added
 
 		while (epoch < 800 || errorDifference < errorThreshold) {
 
@@ -92,7 +105,18 @@ class MLP{
 					forwardpass(inputs[j]);
 					backwardpass(targets[j], learningRate);
 				}
-			//update weights
+				double interDerivative = 0;
+				double[] interDerivatives;
+				interDerivatives = updateInterDerivative(interDerivative);
+
+				System.out.println("iiiiiiiiii "+interDerivative);
+				//update weights
+				int counter = 0;
+				for (Layer layer : layers) { 
+					
+					layer.updateWeights(learningRate,interDerivatives[counter]); //gonna expand with interDerivative
+					counter++;
+				}
 			}
 
 			double currentError = computeError(targets);

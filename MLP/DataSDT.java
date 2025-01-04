@@ -1,4 +1,5 @@
 package MLP;
+
 import java.util.Random;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -9,13 +10,13 @@ import java.io.IOException;
 import java.lang.Math;
 
 
-class DataSDT{
+public class DataSDT{
 
 	private double[][] inputs;
 	private int[][] labels;
 	private int dataset_size;
 	private String filePath;
-
+	
 	public DataSDT() {
 		dataset_size = Utils.DATASET_SIZE;
 		filePath = "dataSDT.txt";

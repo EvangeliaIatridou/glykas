@@ -73,10 +73,20 @@ class Layer {
 		return deltas;
 	}
 
-	public void updateWeights(double learningRate) {
+	public void updateWeights(double learningRate, double interDerivative) {
         for (Neuron neuron : neurons) {
-            neuron.updateWeights(learningRate);
+            neuron.updateWeights(learningRate,interDerivative);
         }
+    }
+
+	public double updateInterDerivative(double interDerivative) { //VERY very sceptical about ths
+        for (Neuron neuron : neurons) {
+			for(int i =0;i<neuron.getInputs().length;i++){
+				interDerivative = neuron.updateInterDerivative(neuron.getInputs()[i],interDerivative);
+				//System.out.println("aaaaaaaa "+interDerivative);
+			}
+		}
+		return interDerivative;
     }
 
 	public void updateDeltas(double[] deltas) {

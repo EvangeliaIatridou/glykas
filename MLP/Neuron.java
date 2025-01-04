@@ -10,6 +10,7 @@ class Neuron{
 	private double totalInput;
 	private double output;
 	private double delta;
+	
 	private ActivationFunction activationFunction;
 
 	public Neuron(int numInputs, ActivationFunction activationFunction) {
@@ -78,11 +79,23 @@ class Neuron{
 		return derivative;
 	}
 	
-	public void updateWeights(double learningRate) {
-		weights[0] -= learningRate * delta;
+	public double updateInterDerivative(double input, double interDerivative){ //maybe not needed here bt needed at mlp well see
+		
+		interDerivative += delta*input; 
 
+		return interDerivative;
+	}
+
+	public void updateWeights(double learningRate, double interDerivative) {
+		weights[0] -= learningRate * delta;
 		for (int i = 1; i < weights.length; i++) {
-			weights[i] -= learningRate * delta * inputs[i-1];
+			//weights[i] -= learningRate * delta * inputs[i-1];
+			weights[i] -= learningRate * interDerivative;
+			/*
+			System.out.println("inter_------"+updateInterDerivative(inputs[i-1])); //debugging
+			System.out.println("weights[i]   "+weights[i]);
+			System.out.println("asdddddddddddd   "+learningRate * updateInterDerivative(inputs[i-1]));
+			*/
 		}
 	}
 	

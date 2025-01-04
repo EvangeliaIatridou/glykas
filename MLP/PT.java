@@ -113,5 +113,7 @@ class PT {
 
 		double testResult = mlp.test(controlInputs, controlTargets);
 		System.out.println("Test Accuracy: " + testResult + "%");
+
+		//to compute ikanothta genikeushs we just do testresult/100
 	}
 }
