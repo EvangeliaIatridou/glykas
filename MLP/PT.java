@@ -63,7 +63,7 @@ class PT {
 
 
 		System.out.print("\nDefine the mini-batch size (B) for training: N/");
-    	batchSize = dataset_size / in.nextInt();
+    	batchSize = (dataset_size / 2) / in.nextInt();
 
 		in.close();
 	}
@@ -111,8 +111,7 @@ class PT {
 
 		mlp.gradientDescentWithBatches(trainingInputs, trainingTargets, pt.learning_rate, pt.batchSize, pt.error_threshold);
 
-		double testResult = mlp.test(controlInputs, controlTargets);
-		System.out.println("Test Accuracy: " + testResult + "%");
+		mlp.test(controlInputs, controlTargets);
 
 		//to compute ikanothta genikeushs we just do testresult/100
 	}

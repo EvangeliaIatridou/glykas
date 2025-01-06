@@ -21,9 +21,15 @@ class Neuron{
 		output = 0;
 
 		Random r = new Random();
-
+		//System.out.println("neuron");
 		for (int i = 0; i < numInputs+1; i++) {
 			weights[i] = (2 * r.nextDouble()) - 1; // random double between -1 and 1
+			//System.out.println(i + ": " + weights[i]);
+			//eeeeee
+			if (activationFunction == ActivationFunction.NONE) {
+				weights[0] = 0;
+				weights[1] = 1;
+			}
         }
 	}
 

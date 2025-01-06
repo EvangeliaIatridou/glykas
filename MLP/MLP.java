@@ -19,7 +19,6 @@ class MLP{
 		for (int i = 0; i < layersNum; i++) {
 			layers[i] = new Layer(layerSizes[i], (i == 0 ? 1 : layerSizes [i -1]), activationFunctions[i]);
 		}
-
 	}
 
 	public void displayMLPArchitecture() {
@@ -59,12 +58,12 @@ class MLP{
 		double[] layerDerivatives = outputLayer.computeDerivatives();
 
 		for (int i = 0; i < outputSize; i++) {
-			double error = target[i] - finalOutput[i];
+			double error = finalOutput[i] - target[i];
 			outputDeltas[i] = error * layerDerivatives[i];
 		}
 		outputLayer.updateDeltas(outputDeltas);
 
-		for (int i = layersNum - 2; i >= 0; i--) {
+		for (int i = layersNum - 2; i > 0; i--) {
 			Layer currentLayer = layers[i];
 			Layer nextLayer = layers[i+1];
 					
@@ -98,7 +97,7 @@ class MLP{
 		double previousError = 0;
 		//double interDerivative; //added
 
-		while (epoch < 800 || errorDifference < errorThreshold) {
+		while (true) {
 
 			for (int i = 0; i < batches; i++) {
 				for (int j = i*batchSize; j < ((i+1)*batchSize); j++) {
@@ -124,15 +123,18 @@ class MLP{
                 errorDifference = Math.abs(currentError - previousError);
             }
 			previousError = currentError;
-			epoch++;
-
 			System.out.println("Epoch " + epoch + " Error: " + currentError);
 
-			if (epoch > 800 && errorDifference <= errorThreshold) {
-                System.out.println("Training terminated at epoch " + epoch + " with error difference " + errorDifference);
-                return;
-            }
+			epoch++;
+			
+			if (epoch > 800) {
+				if (errorDifference < errorThreshold) {
+					System.out.println("\nTraining terminated at epoch " + (epoch-1) + " with error difference " + errorDifference);
+        			return;
+				}
+			}
 		}
+		
 	}
 
 	private int getPredictedCategory() {
@@ -145,8 +147,9 @@ class MLP{
         return category;
     }
 
-	public double test(double[][] testInputs, int[][] testLabels) {
+	public void test(double[][] testInputs, int[][] testLabels) {
 		int correctPredictions = 0;
+		double testResult = 0.0;
 		
 		for (int i = 0; i < testInputs.length; i++) {
 			forwardpass(testInputs[i]);
@@ -155,7 +158,7 @@ class MLP{
 				correctPredictions++;
 			}
 		}
-		return (double) correctPredictions / testInputs.length;
+		testResult = (correctPredictions / (double) testLabels.length)*100;
+		System.out.println("Test Accuracy: " + testResult + "% !!!");
 	}
-
 }
