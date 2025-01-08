@@ -6,13 +6,11 @@ class Layer {
 
 	private int size;
 	private Neuron[] neurons;
-	//private int previousLayerSize;
 	private ActivationFunction activationFunction;
 
     public Layer(int size, int previousLayerSize, ActivationFunction activationFunction) {
         this.size = size;
         this.neurons = new Neuron[size];
-		//this.previousLayerSize = previousLayerSize;
 		this.activationFunction = activationFunction;
 
         for (int i = 0; i < size; i++) {
@@ -79,11 +77,10 @@ class Layer {
         }
     }
 
-	public double updateInterDerivative(double interDerivative) { //VERY very sceptical about ths
+	public double updateInterDerivative(double interDerivative) { 
         for (Neuron neuron : neurons) {
 			for(int i =0;i<neuron.getInputs().length;i++){
 				interDerivative = neuron.updateInterDerivative(neuron.getInputs()[i],interDerivative);
-				//System.out.println("aaaaaaaa "+interDerivative);
 			}
 		}
 		return interDerivative;

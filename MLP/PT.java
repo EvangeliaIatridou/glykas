@@ -4,7 +4,6 @@ import java.util.Scanner;
 import MLP.Utils.ActivationFunction;
 
 
-//auth tha einai h klassh me ta main kai pou tha epilegei o xrhsths an thelei 2 h 3 layers of neurons gia na ylopoihsei antistoixa to PT2 h to PT3
 class PT {
 
 	private int k = Utils.K;
@@ -23,10 +22,6 @@ class PT {
 		batchSize = 0;
 
 		Scanner in = new Scanner(System.in);
-
-		//System.out.print("Define the number of input neurons (d): ");
-		//int d = in.nextInt();
-
 
 		System.out.print("\nDefine the number of hidden layers (pick 2 or 3): "); 
 		layers = in.nextInt();
@@ -78,7 +73,7 @@ class PT {
 			+" "+ (layers == 3? layerSizes[3] : "")
 			+ "\nActivation Function for each hidden layer: " + activationFunctions[1] +" "+ activationFunctions[2] +" "
 			+ (layers == 3? activationFunctions[3] : "")
-			+ "\nMini-batch size (B): N/" + (dataset_size / batchSize));
+			+ "\nMini-batch size (B): N/" + ((dataset_size/2) / batchSize));
 			System.out.println("\n----------------------------\n");
 	}
 
@@ -112,7 +107,5 @@ class PT {
 		mlp.gradientDescentWithBatches(trainingInputs, trainingTargets, pt.learning_rate, pt.batchSize, pt.error_threshold);
 
 		mlp.test(controlInputs, controlTargets);
-
-		//to compute ikanothta genikeushs we just do testresult/100
 	}
 }

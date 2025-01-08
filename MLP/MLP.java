@@ -4,14 +4,12 @@ import MLP.Utils.ActivationFunction;
 
 class MLP{
 
-	//private int inputSize;
 	private int outputSize;
 	private Layer[] layers;
 	private int layersNum;
 	private double[] finalOutput;
 	
 	public MLP(int outputSize, int[] layerSizes, ActivationFunction[] activationFunctions){
-		//this.inputSize = inputSize;
 		this.outputSize = outputSize;
 		layersNum = layerSizes.length;
 		layers = new Layer[layersNum];
@@ -34,7 +32,6 @@ class MLP{
 		int counter=0;
 		for(Layer layer: layers){
 			interDerivatives[counter] = layer.updateInterDerivative(interDerivative);
-			//System.out.println("ssssss "+interDerivatives[counter]);
 			counter++;
 		}
 		return interDerivatives;
@@ -70,11 +67,6 @@ class MLP{
 			double[] currentDeltas = currentLayer.computeDeltas(nextLayer.getWeights(), outputDeltas);
 			outputDeltas = currentDeltas;
 		}
-
-		/*
-		for (Layer layer : layers) {  //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-			layer.updateWeights(learningRate);
-		}*/
 	}
 
 	public double computeError(int[][] targets) {
@@ -86,8 +78,7 @@ class MLP{
             }
             totalError += error;
         }
-        return (totalError / targets.length)*0.5;
-		//return totalError / targets.length;
+        return (totalError / (2*targets.length));
 	}
 	
 	public void gradientDescentWithBatches(double[][] inputs, int[][] targets, double learningRate, int batchSize, double errorThreshold) {
@@ -95,7 +86,6 @@ class MLP{
 		int epoch = 0;
 		double errorDifference = Double.MAX_VALUE;
 		double previousError = 0;
-		//double interDerivative; //added
 
 		while (true) {
 
@@ -108,12 +98,10 @@ class MLP{
 				double[] interDerivatives;
 				interDerivatives = updateInterDerivative(interDerivative);
 
-				//System.out.println("iiiiiiiiii "+interDerivative); //debug
-				//update weights
 				int counter = 0;
 				for (Layer layer : layers) { 
 					
-					layer.updateWeights(learningRate,interDerivatives[counter]); //gonna expand with interDerivative
+					layer.updateWeights(learningRate,interDerivatives[counter]); 
 					counter++;
 				}
 			}
@@ -128,7 +116,7 @@ class MLP{
 			epoch++;
 			
 			if (epoch > 800) {
-				if (errorDifference < errorThreshold) {
+				if ((errorDifference < errorThreshold) ){//|| epoch > 2000) {
 					System.out.println("\nTraining terminated at epoch " + (epoch-1) + " with error difference " + errorDifference);
         			return;
 				}

@@ -110,7 +110,7 @@ public class DataSDT{
 				labels[counter][t-1] = 1; 
 
 				line = reader.readLine(); // read next line
-				if(counter<dataset_size) // prints data in cmd
+				if(counter < dataset_size) // prints data in cmd
 				{
 					/*System.out.println(counter + ": " + inputs[counter][0]
 						+ ", " + inputs[counter][1] + ", t: (" 
