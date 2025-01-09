@@ -8,13 +8,13 @@ class Layer {
 	private Neuron[] neurons;
 	private ActivationFunction activationFunction;
 
-    public Layer(int size, int previousLayerSize, ActivationFunction activationFunction) {
+    public Layer(int size, int previousLayerSize, ActivationFunction activationFunction, boolean isInputLayer) {
         this.size = size;
         this.neurons = new Neuron[size];
 		this.activationFunction = activationFunction;
 
         for (int i = 0; i < size; i++) {
-            neurons[i] = new Neuron(previousLayerSize, activationFunction);
+            neurons[i] = new Neuron(previousLayerSize, activationFunction, isInputLayer);
         }
     }
 
@@ -71,11 +71,11 @@ class Layer {
 		return deltas;
 	}
 
-	public void updateWeights(double learningRate, double interDerivative) {
-        for (Neuron neuron : neurons) {
-            neuron.updateWeights(learningRate,interDerivative);
-        }
-    }
+	public void updateWeights() {
+		for (Neuron neuron : neurons) {
+			neuron.updateWeights();
+		}
+	}
 
 	public double updateInterDerivative(double interDerivative) { 
         for (Neuron neuron : neurons) {
@@ -98,6 +98,18 @@ class Layer {
 			weights[i] = neurons[i].getWeights();
 		}
 		return weights;
+	}
+
+	public void updatePartialDerivatives() {
+		for (Neuron neuron :  neurons) {
+			neuron.updatePartialDerivatives();
+		}
+	}
+
+	public void setPartialDerivatives(double partialDerivative) {
+		for (Neuron neuron : neurons) {
+			neuron.setPartialDerivatives(partialDerivative);
+		}
 	}
 	
 	public void setNeurons(Neuron[] neurons){

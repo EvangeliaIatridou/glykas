@@ -5,18 +5,24 @@ import MLP.Utils.ActivationFunction;
 
 class Neuron{
 
+	private double learningRate = Utils.LEARNING_RATE;
+
 	private double[] inputs;
 	private double[] weights;
+	private double[] partialDerivatives;
 	private double totalInput;
 	private double output;
 	private double delta;
+	private boolean isInputNeuron;
 	
 	private ActivationFunction activationFunction;
 
-	public Neuron(int numInputs, ActivationFunction activationFunction) {
+	public Neuron(int numInputs, ActivationFunction activationFunction, boolean isInputNeuron) {
 		this.activationFunction = activationFunction;
+		this.isInputNeuron = isInputNeuron;
 
         weights = new double[numInputs+1];
+		partialDerivatives = new double[numInputs+1];
         inputs = new double[numInputs]; 
 		output = 0;
 
@@ -25,7 +31,7 @@ class Neuron{
 		for (int i = 0; i < numInputs+1; i++) {
 			weights[i] = (2 * r.nextDouble()) - 1; // random double between -1 and 1
 
-			if (activationFunction == ActivationFunction.NONE) {
+			if (isInputNeuron) {
 				weights[0] = 0;
 				weights[1] = 1;
 			}
@@ -33,7 +39,7 @@ class Neuron{
 	}
 
 	public void computeTotalInput(){
-		if (activationFunction == ActivationFunction.NONE) {
+		if (isInputNeuron) {
 			totalInput = inputs[0];
 			return;
 		}
@@ -49,39 +55,12 @@ class Neuron{
 	
 	public double computeOutput() {
 		computeTotalInput();
-		switch (activationFunction) {
-			case TANH:
-				output = Math.tanh(totalInput);
-				break;
-			case RELU:
-				output = (totalInput > 0) ? totalInput : 0; //relu
-				break;
-			case SIGMOID:
-				output = 1.0 / (1.0 + Math.exp(-totalInput)); // sigmoid
-				break;
-			default:
-				output = totalInput;
-		}
+		output = activationFunction.activate(totalInput);
 		return output;
 	}
 
 	public double computeDerivative() {
-		double derivative;
-	
-		switch (activationFunction) {
-			case TANH:
-				derivative = 1 - Math.pow(output, 2);
-				break;
-			case RELU:
-				derivative = (output > 0) ? 1 : 0;
-				break;
-			case SIGMOID:
-				derivative = output * (1 - output);
-				break;
-			default:
-				derivative = 1; 
-		}
-		return derivative;
+		return activationFunction.derivative(output);
 	}
 	
 	public double updateInterDerivative(double input, double interDerivative){ 
@@ -91,11 +70,23 @@ class Neuron{
 		return interDerivative;
 	}
 
-	public void updateWeights(double learningRate, double interDerivative) {
-		weights[0] -= learningRate * delta;
-		for (int i = 1; i < weights.length; i++) {
-			weights[i] -= learningRate * interDerivative;
+	public void updateWeights() {
+		for (int i = 0; i < weights.length; i++) {
+			weights[i] -= learningRate * partialDerivatives[i];
 		}
+	}
+
+	public void updatePartialDerivatives() {
+		partialDerivatives[0] = delta;
+
+		for (int i = 1; i < partialDerivatives.length; i++) {
+			partialDerivatives[i] = delta * inputs[i-1];
+		}
+	}
+
+	public void setPartialDerivatives(double value) {
+		for (int i = 1; i < partialDerivatives.length; i++)
+		partialDerivatives[i] = value;	
 	}
 	
 	public void setInputs(double[] inputs){

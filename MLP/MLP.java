@@ -1,8 +1,14 @@
 package MLP;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
+
 import MLP.Utils.ActivationFunction;
 
 class MLP{
+
+	private double errorThreshold = Utils.ERROR_THRESHOLD;
 
 	private int outputSize;
 	private Layer[] layers;
@@ -13,9 +19,11 @@ class MLP{
 		this.outputSize = outputSize;
 		layersNum = layerSizes.length;
 		layers = new Layer[layersNum];
+		boolean isInputLayer;
 		
 		for (int i = 0; i < layersNum; i++) {
-			layers[i] = new Layer(layerSizes[i], (i == 0 ? 1 : layerSizes [i -1]), activationFunctions[i]);
+			isInputLayer = i == 0;
+			layers[i] = new Layer(layerSizes[i], (i == 0 ? 1 : layerSizes [i -1]), activationFunctions[i], isInputLayer);
 		}
 	}
 
@@ -38,7 +46,7 @@ class MLP{
 		
 	}
 
-	public void forwardpass(double[] initialInput) {
+	public void forwardPass(double[] initialInput) {
 		layers[0].setNeuronInputs(initialInput);
 	
 		for (int i = 0; i < layersNum - 1; i++) { 
@@ -49,16 +57,16 @@ class MLP{
 		finalOutput = layers[layersNum - 1].computeOutputs();
 	}
 	
-	public void backwardpass(int[] target, double learningRate) {
+	public void backwardPass(int[] target) {
 		double[] outputDeltas = new double[outputSize];
-		Layer outputLayer = layers[layersNum - 1];
-		double[] layerDerivatives = outputLayer.computeDerivatives();
+		double[] layerDerivatives = layers[layersNum - 1].computeDerivatives();
+		double error = 0;
 
 		for (int i = 0; i < outputSize; i++) {
-			double error = finalOutput[i] - target[i];
+			error = finalOutput[i] - target[i];
 			outputDeltas[i] = error * layerDerivatives[i];
 		}
-		outputLayer.updateDeltas(outputDeltas);
+		layers[layersNum - 1].updateDeltas(outputDeltas);
 
 		for (int i = layersNum - 2; i > 0; i--) {
 			Layer currentLayer = layers[i];
@@ -67,62 +75,79 @@ class MLP{
 			double[] currentDeltas = currentLayer.computeDeltas(nextLayer.getWeights(), outputDeltas);
 			outputDeltas = currentDeltas;
 		}
+
+		updatePartialDerivatives();
 	}
 
-	public double computeError(int[][] targets) {
-		double totalError = 0;
-		for (int i = 0; i < targets.length; i++) {
-            double error = 0;
-            for (int j = 0; j < outputSize; j++) {
-                error += Math.pow(targets[i][j] - finalOutput[j], 2);
-            }
-            totalError += error;
-        }
-        return (totalError / (2*targets.length));
+	public void initializePartialDerivatives() {
+		for (int i = 0; i < layersNum; i ++) {
+			layers[i].setPartialDerivatives(0);
+		}
+	}
+
+	public void updatePartialDerivatives() {
+		for (int i = 0; i < layersNum; i ++) {
+			layers[i].updatePartialDerivatives();
+		}
+	}
+
+	public void updateWeights() {
+		for (int i = 1; i < layersNum; i ++) {
+			layers[i].updateWeights();
+		}
 	}
 	
-	public void gradientDescentWithBatches(double[][] inputs, int[][] targets, double learningRate, int batchSize, double errorThreshold) {
+	public void gradientDescentWithBatches(double[][] inputs, int[][] targets, int batchSize) {
 		int batches = inputs.length / batchSize;
 		int epoch = 0;
 		double errorDifference = Double.MAX_VALUE;
 		double previousError = 0;
+		double currentError = 0;
 
 		while (true) {
+			initializePartialDerivatives();
+			currentError = 0;
 
 			for (int i = 0; i < batches; i++) {
 				for (int j = i*batchSize; j < ((i+1)*batchSize); j++) {
-					forwardpass(inputs[j]);
-					backwardpass(targets[j], learningRate);
+					forwardPass(inputs[j]);
+					backwardPass(targets[j]);
+					currentError += calculateError(targets[j]);
 				}
-				double interDerivative = 0;
-				double[] interDerivatives;
-				interDerivatives = updateInterDerivative(interDerivative);
 
-				int counter = 0;
-				for (Layer layer : layers) { 
-					
-					layer.updateWeights(learningRate,interDerivatives[counter]); 
-					counter++;
-				}
+				updateWeights();
 			}
 
-			double currentError = computeError(targets);
-			if (epoch > 0) {
-                errorDifference = Math.abs(currentError - previousError);
-            }
-			previousError = currentError;
-			System.out.println("Epoch " + epoch + " Error: " + currentError);
+			currentError /= inputs.length;
+			System.out.println("Epoch " + epoch + ": E(w)= " + currentError);
 
+			if (epoch > 0) {
+				errorDifference = Math.abs(currentError - previousError);
+			}
+
+			previousError = currentError;
 			epoch++;
 			
 			if (epoch > 800) {
-				if ((errorDifference < errorThreshold) ){//|| epoch > 2000) {
+				if ((errorDifference < errorThreshold) || epoch > 4000) {
 					System.out.println("\nTraining terminated at epoch " + (epoch-1) + " with error difference " + errorDifference);
         			return;
 				}
 			}
 		}
 		
+	}
+
+	private double calculateError(int[] target) {
+		double error = 0.0;
+		double difference = 0.0;
+
+		for (int i = 0; i < outputSize; i ++) {
+			difference = finalOutput[i] - target[i];
+			error += difference * difference;
+		}
+
+		return error / outputSize;
 	}
 
 	private int getPredictedCategory() {
@@ -138,15 +163,39 @@ class MLP{
 	public void test(double[][] testInputs, int[][] testLabels) {
 		int correctPredictions = 0;
 		double testResult = 0.0;
+		String outData = "";
+		boolean predictedCorrectly = false;
 		
 		for (int i = 0; i < testInputs.length; i++) {
-			forwardpass(testInputs[i]);
+
+			predictedCorrectly = false;
+			forwardPass(testInputs[i]);
 			int predictedCategory = getPredictedCategory();
+
 			if (testLabels[i][predictedCategory] == 1) {
+				predictedCorrectly = true;
 				correctPredictions++;
 			}
+
+			for(int j = 0; j<testInputs[i].length;j++){
+                outData += testInputs[i][j] + ","; //somehow i have to find the actual labels and turn the one who isnt predicted correctly into 0 
+            }
+
+			if (predictedCorrectly) outData += (predictedCategory+1) + "\n";
+			else outData += "0" + "\n";
 		}
+
 		testResult = (correctPredictions / (double) testLabels.length)*100;
 		System.out.println("Test Accuracy: " + testResult + "% !!!");
+
+        String filePath = "predictions.txt";
+
+        try(BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))){
+            writer.write(outData);
+        }catch(IOException e){
+            System.err.println("error occured: unable to write MLP data.");
+            System.exit(0);
+        }
+
 	}
 }

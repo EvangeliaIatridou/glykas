@@ -9,8 +9,6 @@ class PT {
 	private int k = Utils.K;
 	private int inputSize = Utils.D;
 	private int dataset_size = Utils.DATASET_SIZE;
-	private double learning_rate = Utils.LEARNING_RATE;
-	private double error_threshold = Utils.ERROR_THRESHOLD;
 
 	private int layers; 
 	private int[] layerSizes;
@@ -104,7 +102,7 @@ class PT {
 		MLP mlp = new MLP(pt.k, pt.layerSizes, pt.activationFunctions);
 		mlp.displayMLPArchitecture();
 
-		mlp.gradientDescentWithBatches(trainingInputs, trainingTargets, pt.learning_rate, pt.batchSize, pt.error_threshold);
+		mlp.gradientDescentWithBatches(trainingInputs, trainingTargets, pt.batchSize);
 
 		mlp.test(controlInputs, controlTargets);
 	}
